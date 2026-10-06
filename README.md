@@ -1,2 +1,2 @@
 # Torque-Guide
-Peersonal Torque Guide
+Personal Torque Guide
