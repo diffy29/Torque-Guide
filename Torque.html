@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Field Torque Calculator</title>
+    <style>
+        :root {
+            --bg-main: #0f172a;
+            --card-bg: #1e293b;
+            --input-bg: #334155;
+            --border-color: #475569;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-green-glow: rgba(16, 185, 129, 0.2);
+            --accent-gold: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 20px 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .app-card {
+            width: 100%;
+            max-width: 440px;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 24px 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Header Redesign */
+        .brand-header {
+            text-align: center;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .main-title {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #93c5fd 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .main-title span {
+            -webkit-text-fill-color: initial;
+            font-size: 24px;
+        }
+
+        .badge-sub {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 5px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 8px;
+        }
+
+        /* Input Controls */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .label-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .custom-select, .custom-input {
+            width: 100%;
+            padding: 12px 14px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-main);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .custom-select:focus, .custom-input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        /* Modern Toggle Cards */
+        .toggles-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .toggle-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .toggle-card:hover {
+            background: var(--input-bg);
+        }
+
+        .toggle-label {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #64748b;
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-green);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Calculate Button */
+        .btn-calc {
+            width: 100%;
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            color: #ffffff;
+            border: none;
+            padding: 15px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 20px -5px rgba(29, 78, 216, 0.4);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-calc:active {
+            transform: scale(0.98);
+        }
+
+        /* Result Box Display */
+        .result-dashboard {
+            margin-top: 22px;
+            background: #090d16;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 18px;
+            padding: 20px;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.3s ease-out forwards;
+            box-shadow: 0 0 25px var(--accent-green-glow);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .res-head {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .res-primary {
+            font-size: 38px;
+            font-weight: 900;
+            color: var(--accent-green);
+            margin: 4px 0;
+            text-shadow: 0 0 12px var(--accent-green-glow);
+        }
+
+        .res-secondary {
+            font-size: 15px;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        /* Tool Guide Grid */
+        .tools-card {
+            margin-top: 14px;
+            background: rgba(245, 158, 11, 0.08);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            border-radius: 16px;
+            padding: 16px;
+            display: none;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .tools-title {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-gold);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .tool-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 4px 0;
+            border-bottom: 1px dashed rgba(245, 158, 11, 0.15);
+        }
+
+        .tool-row:last-child {
+            border-bottom: none;
+        }
+
+        .tool-val {
+            font-weight: 700;
+            color: #fef08a;
+        }
+
+        .info-temp {
+            font-size: 12px;
+            color: #60a5fa;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        .notes {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-card">
+    <div class="brand-header">
+        <div class="main-title">
+            <span>⚙️</span> TIGHTENING TORQUE
+        </div>
+        <span class="badge-sub">Field Calculation Guide</span>
+    </div>
+    
+    <div class="input-group">
+        <label class="label-title" for="material">🔩 Material / Grade Baut</label>
+        <select class="custom-select" id="material">
+            <option value="8.8">ISO 8.8 (Carbon Steel)</option>
+            <option value="10.9" selected>ISO 10.9 (High Tensile)</option>
+            <option value="12.9">ISO 12.9</option>
+            <option value="A2">A2-50 / A2-70 (Stainless Steel)</option>
+            <option value="A4">A4-50 / A4-70 (Stainless Steel)</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label class="label-title" for="boltSize">📏 Ukuran Baut (Thread Size)</label>
+        <select class="custom-select" id="boltSize">
+            <option value="M4">M4</option>
+            <option value="M5">M5</option>
+            <option value="M6">M6</option>
+            <option value="M8">M8</option>
+            <option value="M10">M10</option>
+            <option value="M12" selected>M12</option>
+            <option value="M14">M14</option>
+            <option value="M16">M16</option>
+            <option value="M20">M20</option>
+            <option value="M22">M22</option>
+            <option value="M24">M24</option>
+            <option value="M27">M27</option>
+            <option value="M30">M30</option>
+            <option value="M30x2">M30x2</option>
+            <option value="M30x3">M30x3</option>
+            <option value="M33">M33</option>
+            <option value="M33x2">M33x2</option>
+            <option value="M33x3">M33x3</option>
+            <option value="M36">M36</option>
+            <option value="M39">M39</option>
+            <option value="M39x3">M39x3</option>
+            <option value="M42">M42</option>
+            <option value="M42x3">M42x3</option>
+            <option value="M45">M45</option>
+            <option value="M48">M48</option>
+            <option value="M52">M52</option>
+            <option value="M52x3">M52x3</option>
+            <option value="M56">M56</option>
+            <option value="M60">M60</option>
+            <option value="M64">M64</option>
+            <option value="M68">M68</option>
+            <option value="M72x6">M72x6</option>
+            <option value="M76x6">M76x6</option>
+            <option value="M80x4">M80x4</option>
+            <option value="M90x4">M90x4</option>
+            <option value="M90x6">M90x6</option>
+            <option value="M100x4">M100x4</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label class="label-title" for="tempInput">🌡️ Suhu Operasional / Ambient (°C)</label>
+        <input type="number" class="custom-input" id="tempInput" value="20">
+        <div class="info-temp" id="tempInfo"></div>
+    </div>
+
+    <div class="toggles-container">
+        <label class="toggle-card">
+            <span class="toggle-label">Wedge Lock Washer (+15%)</span>
+            <span class="switch">
+                <input type="checkbox" id="wedgeLock">
+                <span class="slider"></span>
+            </span>
+        </label>
+
+        <label class="toggle-card">
+            <span class="toggle-label">Menggunakan LOCTITE (+50%)</span>
+            <span class="switch">
+                <input type="checkbox" id="loctite">
+                <span class="slider"></span>
+            </span>
+        </label>
+    </div>
+
+    <button class="btn-calc" onclick="calculate()">
+        ⚡ Kalkulasikan Torsi
+    </button>
+
+    <div class="result-dashboard" id="resultBox">
+        <div class="res-head">Rekomendasi Torsi Akhir</div>
+        <div class="res-primary" id="torqueNm">0 Nm</div>
+        <div class="res-secondary" id="torqueFtLbs">0 lbf ft</div>
+    </div>
+
+    <div class="tools-card" id="toolGuideBox">
+        <div class="tools-title">🛠️ Panduan Ukuran Kunci</div>
+        <div class="tool-row">
+            <span>Socket Wrench (Hex Head)</span>
+            <span class="tool-val" id="wrenchSize">-</span>
+        </div>
+        <div class="tool-row">
+            <span>Allen Socket (Baut L)</span>
+            <span class="tool-val" id="allenSize">-</span>
+        </div>
+    </div>
+
+    <div class="notes">
+        <b>Catatan & Ketentuan Standar:</b><br>
+        • Suhu otomatis dibulatkan ke kelipatan 10°C terdekat & diinterpolasi linier.<br>
+        • Toleransi pengencangan kunci torsi manual maks &plusmn;4%.
+    </div>
+</div>
+
+<script>
+    const db = {
+        "8.8": {
+            "M4": { 20: 3, 100: 3, 150: 2, 200: 2, 250: 2, 300: 2 },
+            "M5": { 20: 5, 100: 5, 150: 5, 200: 5, 250: 4, 300: 4 },
+            "M6": { 20: 9, 100: 9, 150: 8, 200: 7, 250: 8, 300: 7 },
+            "M8": { 20: 22, 100: 22, 150: 20, 200: 22, 250: 19, 300: 20 },
+            "M10": { 20: 44, 100: 44, 150: 40, 200: 42, 250: 33, 300: 35 },
+            "M12": { 20: 75, 100: 75, 150: 69, 200: 72, 250: 56, 300: 60 },
+            "M14": { 20: 119, 100: 119, 150: 109, 200: 115, 250: 89, 300: 94 },
+            "M16": { 20: 183, 100: 183, 150: 169, 200: 177, 250: 162, 300: 155 },
+            "M20": { 20: 358, 100: 358, 150: 346, 200: 330, 250: 285, 300: 302 },
+            "M22": { 20: 487, 100: 487, 150: 449, 200: 472, 250: 365, 300: 430 },
+            "M24": { 20: 616, 100: 616, 150: 568, 200: 597, 250: 544, 300: 462 },
+            "M27": { 20: 904, 100: 904, 150: 875, 200: 833, 250: 798, 300: 678 },
+            "M30": { 20: 1231, 100: 1231, 150: 1193, 200: 1135, 250: 1087, 300: 1039 },
+            "M30x2": { 20: 1327, 100: 1327, 150: 1223, 200: 1286, 250: 995, 300: 1057 },
+            "M30x3": { 20: 1262, 100: 1262, 150: 1223, 200: 1164, 250: 1006, 300: 947 },
+            "M33": { 20: 1658, 100: 1658, 150: 1529, 200: 1607, 250: 1399, 300: 1244 },
+            "M33x2": { 20: 1773, 100: 1773, 150: 1718, 200: 1635, 250: 1565, 300: 1496 },
+            "M33x3": { 20: 1697, 100: 1697, 150: 1644, 200: 1565, 250: 1499, 300: 1432 },
+            "M36": { 20: 2137, 100: 2137, 150: 2070, 200: 1970, 250: 1803, 300: 1603 },
+            "M39": { 20: 2756, 100: 2756, 150: 2541, 200: 2670, 250: 2067, 300: 2196 },
+            "M39x3": { 20: 2863, 100: 2863, 150: 2774, 200: 2639, 250: 2147, 300: 2282 },
+            "M42": { 20: 3419, 100: 3419, 150: 3312, 200: 3152, 250: 2564, 300: 2725 },
+            "M42x3": { 20: 3608, 100: 3608, 150: 3326, 200: 3496, 250: 2706, 300: 2875 },
+            "M45": { 20: 4255, 100: 4255, 150: 3923, 200: 4122, 250: 3191, 300: 3756 },
+            "M48": { 20: 5152, 100: 5152, 150: 4750, 200: 4991, 250: 4106, 300: 4347 },
+            "M52": { 20: 6596, 100: 6596, 150: 6390, 200: 6081, 250: 5565, 300: 5823 },
+            "M52x3": { 20: 6976, 100: 6976, 150: 6431, 200: 6758, 250: 5886, 300: 5559 },
+            "M56": { 20: 8227, 100: 8227, 150: 7585, 200: 7970, 250: 6171, 300: 6556 },
+            "M60": { 20: 10174, 100: 10174, 150: 9856, 200: 9379, 250: 7631, 300: 8982 },
+            "M64": { 20: 12259, 100: 12259, 150: 11875, 200: 11301, 250: 10822, 300: 10343 },
+            "M68": { 20: 14771, 100: 14771, 150: 14309, 200: 13617, 250: 11771, 300: 13040 },
+            "M72x6": { 20: 17623, 100: 17623, 150: 17072, 200: 16246, 250: 15558, 300: 14869 },
+            "M76x6": { 20: 20777, 100: 20777, 150: 20127, 200: 19153, 250: 16556, 300: 15582 },
+            "M80x4": { 20: 25157, 100: 25157, 150: 23192, 200: 24371, 250: 18868, 300: 22209 },
+            "M90x4": { 20: 36057, 100: 36057, 150: 34930, 200: 33240, 250: 31832, 300: 30423 },
+            "M90x6": { 20: 35005, 100: 35005, 150: 32270, 200: 33911, 250: 29535, 300: 27894 },
+            "M100x4": { 20: 49883, 100: 49883, 150: 48324, 200: 45986, 250: 44037, 300: 42089 }
+        },
+        "10.9": {
+            "M4": { 20: 4, 100: 4, 150: 4, 200: 3, 250: 3, 300: 3 },
+            "M5": { 20: 8, 100: 8, 150: 7, 200: 7, 250: 6, 300: 6 },
+            "M6": { 20: 14, 100: 14, 150: 13, 200: 11, 250: 11, 300: 10 },
+            "M8": { 20: 33, 100: 33, 150: 30, 200: 27, 250: 26, 300: 24 },
+            "M10": { 20: 64, 100: 64, 150: 62, 200: 54, 250: 51, 300: 48 },
+            "M12": { 20: 110, 100: 110, 150: 107, 200: 92, 250: 87, 300: 82 },
+            "M14": { 20: 174, 100: 174, 150: 162, 200: 146, 250: 138, 300: 131 },
+            "M16": { 20: 269, 100: 269, 150: 262, 200: 226, 250: 214, 300: 202 },
+            "M20": { 20: 525, 100: 525, 150: 489, 200: 441, 250: 418, 300: 394 },
+            "M22": { 20: 716, 100: 716, 150: 697, 200: 601, 250: 596, 300: 537 },
+            "M24": { 20: 905, 100: 905, 150: 881, 200: 761, 250: 720, 300: 679 },
+            "M27": { 20: 1327, 100: 1327, 150: 1235, 200: 1115, 250: 1055, 300: 995 },
+            "M30": { 20: 1808, 100: 1808, 150: 1700, 200: 1520, 250: 1438, 300: 1356 },
+            "M30x2": { 20: 1949, 100: 1949, 150: 1814, 200: 1638, 250: 1550, 300: 1462 },
+            "M30x3": { 20: 1854, 100: 1854, 150: 1805, 200: 1726, 250: 1474, 300: 1391 },
+            "M33": { 20: 2436, 100: 2436, 150: 2267, 200: 2047, 250: 1937, 300: 1827 },
+            "M33x2": { 20: 2604, 100: 2604, 150: 2535, 200: 2424, 250: 2306, 300: 2189 },
+            "M33x3": { 20: 2493, 100: 2493, 150: 2427, 200: 2321, 250: 2208, 300: 2095 },
+            "M36": { 20: 3139, 100: 3139, 150: 3055, 200: 2780, 250: 2638, 300: 2496 },
+            "M39": { 20: 4048, 100: 4048, 150: 3940, 200: 3585, 250: 3402, 300: 3219 },
+            "M39x3": { 20: 4205, 100: 4205, 150: 4093, 200: 3914, 250: 3724, 300: 3534 },
+            "M42": { 20: 5022, 100: 5022, 150: 4675, 200: 4448, 250: 4221, 300: 3994 },
+            "M42x3": { 20: 5300, 100: 5300, 150: 4933, 200: 5159, 250: 4694, 300: 4454 },
+            "M45": { 20: 6250, 100: 6250, 150: 6083, 200: 5818, 250: 5535, 300: 5252 },
+            "M48": { 20: 7567, 100: 7567, 150: 7044, 200: 6702, 250: 6360, 300: 6018 },
+            "M52": { 20: 9688, 100: 9688, 150: 9430, 200: 9018, 250: 8580, 300: 8142 },
+            "M52x3": { 20: 10246, 100: 10246, 150: 9537, 200: 9973, 250: 9074, 300: 8611 },
+            "M56": { 20: 12084, 100: 12084, 150: 11248, 200: 10702, 250: 10156, 300: 9609 },
+            "M60": { 20: 14943, 100: 14943, 150: 14546, 200: 13910, 250: 13234, 300: 12559 },
+            "M64": { 20: 18005, 100: 18005, 150: 17526, 200: 15946, 250: 15132, 300: 14318 },
+            "M68": { 20: 21695, 100: 21695, 150: 21118, 200: 20195, 250: 19214, 300: 18233 },
+            "M72x6": { 20: 25883, 100: 25883, 150: 25195, 200: 24094, 250: 22923, 300: 21753 },
+            "M76x6": { 20: 30516, 100: 30516, 150: 29704, 200: 28406, 250: 27026, 300: 25646 },
+            "M80x4": { 20: 36950, 100: 36950, 150: 35967, 200: 34394, 250: 32724, 300: 31053 },
+            "M90x4": { 20: 52959, 100: 52959, 150: 51550, 200: 49297, 250: 46902, 300: 44508 },
+            "M90x6": { 20: 51413, 100: 51413, 150: 50046, 200: 49297, 250: 47858, 300: 43209 },
+            "M100x4": { 20: 73265, 100: 73265, 150: 71317, 200: 68199, 250: 64887, 300: 61574 }
+        },
+        "12.9": {
+            "M4": { 20: 5, 100: 4, 150: 4, 200: 4, 250: 4, 300: 4 },
+            "M5": { 20: 9, 100: 5, 150: 8, 200: 8, 250: 7, 300: 7 },
+            "M6": { 20: 16, 100: 9, 150: 14, 200: 13, 250: 13, 300: 12 },
+            "M8": { 20: 38, 100: 9, 150: 34, 200: 32, 250: 30, 300: 29 },
+            "M10": { 20: 75, 100: 15, 150: 66, 200: 63, 250: 60, 300: 56 },
+            "M12": { 20: 129, 100: 15, 150: 114, 200: 108, 250: 102, 300: 96 },
+            "M14": { 20: 204, 100: 35, 150: 180, 200: 171, 250: 162, 300: 153 },
+            "M16": { 20: 315, 100: 37, 150: 278, 200: 265, 250: 250, 300: 236 },
+            "M20": { 20: 615, 100: 69, 150: 543, 200: 517, 250: 489, 300: 461 },
+            "M22": { 20: 837, 100: 73, 150: 740, 200: 704, 250: 666, 300: 628 },
+            "M24": { 20: 1060, 100: 119, 150: 937, 200: 891, 250: 843, 300: 795 },
+            "M27": { 20: 1553, 100: 125, 150: 1373, 200: 1306, 250: 1235, 300: 1165 },
+            "M30": { 20: 2116, 100: 189, 150: 1871, 200: 1779, 250: 1683, 300: 1587 },
+            "M30x2": { 20: 2281, 100: 198, 150: 2016, 200: 1918, 250: 1814, 300: 1711 },
+            "M30x3": { 20: 2170, 100: 198, 150: 1918, 200: 1825, 250: 1726, 300: 1627 },
+            "M33": { 20: 2850, 100: 306, 150: 2520, 200: 2397, 250: 2267, 300: 2138 },
+            "M33x2": { 20: 3048, 100: 2964, 150: 2826, 200: 2694, 250: 2563, 300: 2424 },
+            "M33x3": { 20: 2918, 100: 2705, 150: 2838, 200: 2579, 250: 2453, 300: 2321 },
+            "M36": { 20: 3673, 100: 3573, 150: 3406, 200: 3247, 250: 3089, 300: 2922 },
+            "M39": { 20: 4737, 100: 4608, 150: 4393, 200: 4188, 250: 3983, 300: 3768 },
+            "M39x3": { 20: 4921, 100: 4563, 150: 4787, 200: 4351, 250: 4138, 300: 3914 },
+            "M42": { 20: 5877, 100: 5716, 150: 5449, 200: 5196, 250: 4942, 300: 4675 },
+            "M42x3": { 20: 6202, 100: 5751, 150: 6033, 200: 5483, 250: 5215, 300: 4933 },
+            "M45": { 20: 7313, 100: 7114, 150: 6782, 200: 6466, 250: 6150, 300: 5818 },
+            "M48": { 20: 8856, 100: 8614, 150: 8211, 200: 7829, 250: 7447, 300: 7044 },
+            "M52": { 20: 11337, 100: 10512, 150: 11027, 200: 10023, 250: 9533, 300: 9018 },
+            "M52x3": { 20: 11990, 100: 11663, 150: 11118, 200: 10600, 250: 10082, 300: 9537 },
+            "M56": { 20: 14141, 100: 13112, 150: 13755, 200: 12502, 250: 11891, 300: 11248 },
+            "M60": { 20: 17487, 100: 17010, 150: 16215, 200: 15460, 250: 14705, 300: 13910 },
+            "M64": { 20: 21069, 100: 20495, 150: 19537, 200: 18627, 250: 17717, 300: 16760 },
+            "M68": { 20: 25388, 100: 24695, 150: 23541, 200: 22445, 250: 21349, 300: 20195 },
+            "M72x6": { 20: 30289, 100: 29463, 150: 28086, 200: 26778, 250: 25470, 300: 24094 },
+            "M76x6": { 20: 35710, 100: 34736, 150: 33113, 200: 31571, 250: 30029, 300: 28406 },
+            "M80x4": { 20: 43239, 100: 40094, 150: 42060, 200: 38227, 250: 36360, 300: 34394 },
+            "M90x4": { 20: 61973, 100: 60283, 150: 57466, 200: 54790, 250: 52114, 300: 49297 },
+            "M90x6": { 20: 60165, 100: 58524, 150: 55789, 200: 53191, 250: 50593, 300: 47858 },
+            "M100x4": { 20: 85736, 100: 83398, 150: 79501, 200: 75799, 250: 72096, 300: 68199 }
+        },
+        "A2": {
+            "M4": { 20: 2, 100: 2, 150: 2, 200: 2, 250: 2, 300: 2 },
+            "M5": { 20: 2, 100: 2, 150: 2, 200: 2, 250: 2, 300: 2 },
+            "M6": { 20: 3, 100: 3, 150: 3, 200: 3, 250: 3, 300: 3 },
+            "M8": { 20: 8, 100: 8, 150: 7, 200: 8, 250: 7, 300: 7 },
+            "M10": { 20: 16, 100: 16, 150: 14, 200: 15, 250: 13, 300: 13 },
+            "M12": { 20: 28, 100: 28, 150: 26, 200: 24, 250: 23, 300: 22 },
+            "M14": { 20: 44, 100: 44, 150: 41, 200: 38, 250: 37, 300: 35 },
+            "M16": { 20: 69, 100: 69, 150: 58, 200: 64, 250: 57, 300: 55 },
+            "M20": { 20: 134, 100: 134, 150: 114, 200: 125, 250: 111, 300: 107 },
+            "M22": { 20: 183, 100: 183, 150: 170, 200: 156, 250: 151, 300: 147 },
+            "M24": { 20: 231, 100: 231, 150: 197, 200: 215, 250: 191, 300: 185 },
+            "M27": { 20: 340, 100: 340, 150: 289, 200: 316, 250: 280, 300: 272 },
+            "M30": { 20: 463, 100: 463, 150: 394, 200: 430, 250: 381, 300: 370 },
+            "M30x2": { 20: 505, 100: 505, 150: 429, 200: 469, 250: 416, 300: 404 },
+            "M30x3": { 20: 477, 100: 477, 150: 405, 200: 442, 250: 393, 300: 381 },
+            "M33": { 20: 625, 100: 625, 150: 580, 200: 531, 250: 515, 300: 500 },
+            "M33x2": { 20: 675, 100: 675, 150: 627, 200: 574, 250: 556, 300: 540 },
+            "M33x3": { 20: 642, 100: 642, 150: 546, 200: 596, 250: 529, 300: 514 },
+            "M36": { 20: 805, 100: 805, 150: 684, 200: 747, 250: 663, 300: 644 },
+            "M39": { 20: 1040, 100: 1040, 150: 965, 200: 884, 250: 856, 300: 832 },
+            "M39x3": { 20: 1086, 100: 1086, 150: 1009, 200: 924, 250: 895, 300: 869 },
+            "M42": { 20: 1288, 100: 1288, 150: 1196, 200: 1095, 250: 1061, 300: 1031 },
+            "M42x3": { 20: 1371, 100: 1371, 150: 1273, 200: 1165, 250: 1130, 300: 1097 },
+            "M45": { 20: 1606, 100: 1606, 150: 1365, 200: 1491, 250: 1323, 300: 1285 },
+            "M48": { 20: 1943, 100: 1943, 150: 1652, 200: 1804, 250: 1601, 300: 1554 },
+            "M52": { 20: 2492, 100: 2492, 150: 2314, 200: 2118, 250: 2053, 300: 1993 },
+            "M52x3": { 20: 2659, 100: 2659, 150: 2469, 200: 2261, 250: 2191, 300: 2128 },
+            "M56": { 20: 3107, 100: 3107, 150: 2885, 200: 2641, 250: 2559, 300: 2485 },
+            "M60": { 20: 3847, 100: 3847, 150: 3270, 200: 3573, 250: 3170, 300: 3078 },
+            "M64": { 20: 4633, 100: 4633, 150: 4302, 200: 3938, 250: 3817, 300: 3706 },
+            "M68": { 20: 5589, 100: 5589, 150: 4751, 200: 5190, 250: 4605, 300: 4472 },
+            "M72x6": { 20: 6676, 100: 6676, 150: 6199, 200: 5674, 250: 5500, 300: 5341 },
+            "M76x6": { 20: 7878, 100: 7878, 150: 7316, 200: 6697, 250: 6490, 300: 6303 },
+            "M80x4": { 20: 9607, 100: 9607, 150: 8166, 200: 8920, 250: 7914, 300: 7685 },
+            "M90x4": { 20: 13788, 100: 13788, 150: 11720, 200: 12803, 250: 11359, 300: 11030 },
+            "M90x6": { 20: 13313, 100: 13313, 150: 12362, 200: 11316, 250: 10967, 300: 10650 },
+            "M100x4": { 20: 19096, 100: 19096, 150: 16232, 200: 17732, 250: 15732, 300: 15277 }
+        },
+        "A4": {
+            "M4": { 20: 2, 100: 2, 150: 2, 200: 2, 250: 2, 300: 2 },
+            "M5": { 20: 4, 100: 4, 150: 4, 200: 4, 250: 4, 300: 3 },
+            "M6": { 20: 7, 100: 7, 150: 7, 200: 6, 250: 6, 300: 6 },
+            "M8": { 20: 18, 100: 18, 150: 17, 200: 15, 250: 15, 300: 14 },
+            "M10": { 20: 35, 100: 35, 150: 30, 200: 33, 250: 29, 300: 28 },
+            "M12": { 20: 60, 100: 60, 150: 56, 200: 51, 250: 49, 300: 48 },
+            "M14": { 20: 95, 100: 95, 150: 89, 200: 81, 250: 78, 300: 76 },
+            "M16": { 20: 147, 100: 147, 150: 125, 200: 137, 250: 121, 300: 118 },
+            "M20": { 20: 288, 100: 288, 150: 244, 200: 268, 250: 237, 300: 230 },
+            "M22": { 20: 393, 100: 393, 150: 334, 200: 367, 250: 324, 300: 314 },
+            "M24": { 20: 496, 100: 496, 150: 463, 200: 421, 250: 409, 300: 397 },
+            "M27": { 20: 729, 100: 729, 150: 620, 200: 680, 250: 601, 300: 583 },
+            "M30": { 20: 992, 100: 992, 150: 926, 200: 843, 250: 818, 300: 794 },
+            "M30x2": { 20: 1082, 100: 1082, 150: 920, 200: 1010, 250: 892, 300: 865 },
+            "M30x3": { 20: 1021, 100: 1021, 150: 868, 200: 953, 250: 842, 300: 817 },
+            "M33": { 20: 1339, 100: 1339, 150: 1138, 200: 1250, 250: 1104, 300: 1072 },
+            "M33x2": { 20: 1447, 100: 1447, 150: 1230, 200: 1351, 250: 1193, 300: 1158 },
+            "M33x3": { 20: 1376, 100: 1376, 150: 1169, 200: 1284, 250: 1134, 300: 1101 },
+            "M36": { 20: 1724, 100: 1724, 150: 1609, 200: 1465, 250: 1421, 300: 1379 },
+            "M39": { 20: 2228, 100: 2228, 150: 1894, 200: 2079, 250: 1837, 300: 1782 },
+            "M39x3": { 20: 2328, 100: 2328, 150: 1979, 200: 2173, 250: 1919, 300: 1863 },
+            "M42": { 20: 2761, 100: 2761, 150: 2347, 200: 2577, 250: 2276, 300: 2209 },
+            "M42x3": { 20: 2938, 100: 2938, 150: 2742, 200: 2497, 250: 2422, 300: 2350 },
+            "M45": { 20: 3442, 100: 3442, 150: 3212, 200: 2925, 250: 2837, 300: 2753 },
+            "M48": { 20: 4164, 100: 4164, 150: 3886, 200: 3539, 250: 3433, 300: 3331 },
+            "M52": { 20: 5340, 100: 5340, 150: 4539, 200: 4984, 250: 4402, 300: 4272 },
+            "M52x3": { 20: 5699, 100: 5699, 150: 4844, 200: 5319, 250: 4698, 300: 4559 },
+            "M56": { 20: 6657, 100: 6657, 150: 6214, 200: 5659, 250: 5489, 300: 5326 },
+            "M60": { 20: 8244, 100: 8244, 150: 7008, 200: 7695, 250: 6797, 300: 6595 },
+            "M64": { 20: 9928, 100: 9928, 150: 8439, 200: 9266, 250: 8185, 300: 7942 },
+            "M68": { 20: 11977, 100: 11977, 150: 11179, 200: 10181, 250: 9875, 300: 9582 },
+            "M72x6": { 20: 14305, 100: 14305, 150: 13352, 200: 12160, 250: 11794, 300: 11444 },
+            "M76x6": { 20: 16882, 100: 16882, 150: 15757, 200: 14350, 250: 13919, 300: 13506 },
+            "M80x4": { 20: 20586, 100: 20586, 150: 17498, 200: 19213, 250: 16972, 300: 16469 },
+            "M90x4": { 20: 29546, 100: 29546, 150: 27576, 200: 25114, 250: 24359, 300: 23637 },
+            "M90x6": { 20: 28527, 100: 28527, 150: 26625, 200: 24248, 250: 23519, 300: 22821 },
+            "M100x4": { 20: 40921, 100: 40921, 150: 38193, 200: 34783, 250: 33737, 300: 32737 }
+        }
+    };
+
+    const toolDatabase = {
+        "M4":   { wrench: "7 mm", allen: "3 mm" },
+        "M5":   { wrench: "8 mm", allen: "4 mm" },
+        "M6":   { wrench: "10 mm", allen: "5 mm" },
+        "M8":   { wrench: "13 mm", allen: "6 mm" },
+        "M10":  { wrench: "16 mm / 17 mm", allen: "8 mm" },
+        "M12":  { wrench: "18 mm / 19 mm", allen: "10 mm" },
+        "M14":  { wrench: "21 mm / 22 mm", allen: "12 mm" },
+        "M16":  { wrench: "24 mm", allen: "14 mm" },
+        "M20":  { wrench: "30 mm", allen: "17 mm" },
+        "M22":  { wrench: "34 mm / 32 mm", allen: "17 mm" },
+        "M24":  { wrench: "36 mm", allen: "19 mm" },
+        "M27":  { wrench: "41 mm", allen: "19 mm" },
+        "M30":  { wrench: "46 mm", allen: "22 mm" },
+        "M30x2":{ wrench: "46 mm", allen: "22 mm" },
+        "M30x3":{ wrench: "46 mm", allen: "22 mm" },
+        "M33":  { wrench: "50 mm", allen: "24 mm" },
+        "M33x2":{ wrench: "50 mm", allen: "24 mm" },
+        "M33x3":{ wrench: "50 mm", allen: "24 mm" },
+        "M36":  { wrench: "55 mm", allen: "27 mm" },
+        "M39":  { wrench: "60 mm", allen: "27 mm" },
+        "M39x3":{ wrench: "60 mm", allen: "27 mm" },
+        "M42":  { wrench: "65 mm", allen: "32 mm" },
+        "M42x3":{ wrench: "65 mm", allen: "32 mm" },
+        "M45":  { wrench: "70 mm", allen: "32 mm" },
+        "M48":  { wrench: "75 mm", allen: "36 mm" },
+        "M52":  { wrench: "80 mm", allen: "36 mm" },
+        "M52x3":{ wrench: "80 mm", allen: "36 mm" },
+        "M56":  { wrench: "85 mm", allen: "41 mm" },
+        "M60":  { wrench: "90 mm", allen: "46 mm" },
+        "M64":  { wrench: "95 mm", allen: "46 mm" },
+        "M68":  { wrench: "100 mm", allen: "50 mm" },
+        "M72x6":{ wrench: "105 mm", allen: "50 mm" },
+        "M76x6":{ wrench: "110 mm", allen: "55 mm" },
+        "M80x4":{ wrench: "115 mm", allen: "55 mm" },
+        "M90x4":{ wrench: "130 mm", allen: "60 mm" },
+        "M90x6":{ wrench: "130 mm", allen: "60 mm" },
+        "M100x4":{ wrench: "145 mm", allen: "65 mm" }
+    };
+
+    function getInterpolatedTorque(table, T) {
+        let keys = Object.keys(table).map(Number).sort((a,b) => a - b);
+        if (table[T] !== undefined) return table[T];
+        if (T <= keys[0]) return table[keys[0]];
+        if (T >= keys[keys.length - 1]) return table[keys[keys.length - 1]];
+
+        let lowerKey = keys[0], upperKey = keys[keys.length - 1];
+        for (let i = 0; i < keys.length - 1; i++) {
+            if (T >= keys[i] && T <= keys[i+1]) {
+                lowerKey = keys[i];
+                upperKey = keys[i+1];
+                break;
+            }
+        }
+        let v1 = table[lowerKey], v2 = table[upperKey];
+        return v1 + ((T - lowerKey) / (upperKey - lowerKey)) * (v2 - v1);
+    }
+
+    function calculate() {
+        const mat = document.getElementById("material").value;
+        const size = document.getElementById("boltSize").value;
+        let rawTemp = parseFloat(document.getElementById("tempInput").value) || 20;
+        
+        let roundedTemp = Math.round(rawTemp / 10) * 10;
+        const useWedge = document.getElementById("wedgeLock").checked;
+        const useLoctite = document.getElementById("loctite").checked;
+
+        let table = (db[mat] && db[mat][size]) ? db[mat][size] : { 20: 100, 100: 100 };
+        let baseTorque = getInterpolatedTorque(table, roundedTemp);
+
+        if (useWedge) baseTorque *= 1.15;
+        if (useLoctite) baseTorque *= 1.50;
+
+        let nm = baseTorque.toFixed(1);
+        let ftLbs = (baseTorque * 0.7376).toFixed(1);
+
+        document.getElementById("torqueNm").innerText = nm + " Nm";
+        document.getElementById("torqueFtLbs").innerText = ftLbs + " lbf ft";
+        document.getElementById("tempInfo").innerText = `Acuan kalkulasi suhu: ${roundedTemp}°C (Input: ${rawTemp}°C)`;
+
+        if (toolDatabase[size]) {
+            document.getElementById("wrenchSize").innerText = toolDatabase[size].wrench;
+            document.getElementById("allenSize").innerText = toolDatabase[size].allen;
+        } else {
+            document.getElementById("wrenchSize").innerText = "Sesuai Standar ISO";
+            document.getElementById("allenSize").innerText = "Sesuai Standar ISO";
+        }
+
+        document.getElementById("resultBox").style.display = "block";
+        document.getElementById("toolGuideBox").style.display = "block";
+    }
+</script>
+
+</body>
+</html>
